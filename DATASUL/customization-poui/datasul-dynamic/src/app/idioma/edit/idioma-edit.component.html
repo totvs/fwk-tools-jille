@@ -1,0 +1,17 @@
+<po-loading-overlay
+  [hidden]="!showLoading">
+</po-loading-overlay>
+
+<po-page-edit
+  [p-title]="cTitle"
+  [p-breadcrumb]="breadcrumb"
+  [p-disable-submit]="formEdit.form.invalid"
+  (p-cancel)="cancelClick()"
+  (p-save)="saveClick()">
+  <po-dynamic-form
+    #formEdit
+    p-auto-focus="string"
+    [p-fields]="fields"
+    [p-value]="record">
+  </po-dynamic-form>
+</po-page-edit>
