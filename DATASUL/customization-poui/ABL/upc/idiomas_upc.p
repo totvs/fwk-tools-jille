@@ -34,6 +34,7 @@ AND pEvent    = "getMetaData" THEN DO ON STOP UNDO, LEAVE:
 
     // Cria os novos campos na lista
     ASSIGN jObj = NEW JsonObject().
+    jObj:add('divider', "Itens da UPC").
     jObj:add('property', 'codUsuario').
     jObj:add('label', 'Usu rio').
     jObj:add('visible', TRUE).
@@ -54,9 +55,39 @@ AND pEvent    = "getMetaData" THEN DO ON STOP UNDO, LEAVE:
     ASSIGN jObj = NEW JsonObject().
     jObj:add('property', 'codDialet').
     jObj:add('label', 'Dialeto').
-    jObj:add('visible', TRUE).
+    jObj:add('visible', FALSE). // <- Remove o item da tela de todos seus correspondentes (Form, View, Table)
     jObj:add('required', TRUE).
     jObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
+    jObj:add('gridColumns', 6).
+    jAList:add(jObj).
+    
+    ASSIGN jObj = NEW JsonObject().
+    jObj:add('property', 'testeValidacaoRegEx').
+    jObj:add('label', 'Teste Valida‡Æo RegEx').
+    jObj:add('gridColumns', 6).
+    jObj:add('pattern', "[0-9]~{2~}"). // <- Validacao RegEx
+    jObj:add('errorMessage', 'Obrigat¢rio m¡nimo 2 n£meros consecutivos.').
+    jAList:add(jObj).
+
+    ASSIGN jObj = NEW JsonObject().
+    jObj:add('property', 'numberRangeValidate').
+    jObj:add('label', 'Aplica‡Æo de m scara CPF').
+    jObj:add('mask', '999.999.999-99').  // <-- Mascara CPF
+    jObj:add('visible', TRUE).
+    jObj:add('required', FALSE).
+    jObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
+    jObj:add('gridColumns', 6).
+    jAList:add(jObj).
+    
+    ASSIGN jObj = NEW JsonObject().
+    jObj:add('property', 'numberValidate').
+    jObj:add('label', 'Somente n£meros').
+    jObj:add('visible', TRUE).
+    jObj:add('required', FALSE).
+    jObj:add('minValue', 1).
+    jObj:add('maxValue', 9).
+    jObj:add('errorMessage', 'Somente n£meros de 1 a 9'). // <- Mensagem de erro 1-9
+    jObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('integer')). // <- Restringe a digitacao somente numeros
     jObj:add('gridColumns', 6).
     jAList:add(jObj).
     
