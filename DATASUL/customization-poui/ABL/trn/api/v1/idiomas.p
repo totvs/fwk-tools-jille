@@ -6,6 +6,7 @@
 {utp/ut-api-action.i pUpdateById PUT /~* }
 
 {utp/ut-api-action.i pGetMetadata POST /metadata/~* }
+{utp/ut-api-action.i pValidateForm POST /validateForm/~* }
 {utp/ut-api-action.i pCreate POST /~* }
 
 {utp/ut-api-action.i pDeleteById DELETE /~* }
@@ -27,7 +28,9 @@ PROCEDURE pGetMetadata:
 
     DEFINE VARIABLE oResponse AS JsonAPIResponse NO-UNDO.
     DEFINE VARIABLE oIdiomas  AS JsonArray       NO-UNDO.
+    DEFINE VARIABLE oOpts     AS JsonArray       NO-UNDO.
     DEFINE VARIABLE oObj      AS JsonObject      NO-UNDO.
+    DEFINE VARIABLE oOpt      AS JsonObject      NO-UNDO.
 
     ASSIGN oIdiomas = NEW JsonArray().
     
@@ -73,6 +76,91 @@ PROCEDURE pGetMetadata:
     oObj:add('label', 'Hora éltima Atualiza‡Æo').
     oObj:add('visible', TRUE).
     oObj:add('disable', TRUE).
+    oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
+    oObj:add('gridColumns', 6).
+    oIdiomas:add(oObj).
+
+    // acoes de tela para testes de validacao do formulario
+    ASSIGN oOpts = NEW JsonArray().
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Foco CodIdiomaPadrao').
+    oOpt:add('value', 'focoCodIdiomPadr').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Foco DesIdioma').
+    oOpt:add('value', 'FocoDesIdioma').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Desabilita CodIdiomaPadrao').
+    oOpt:add('value', 'DesabilitaCodIdiomaPadrao').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Habilita CodIdiomaPadrao').
+    oOpt:add('value', 'HabilitaCodIdiomaPadrao').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Mascara CPF').
+    oOpt:add('value', 'MascaraCPF').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Mascara CNPJ').
+    oOpt:add('value', 'MascaraCNPJ').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'TrocaValor DesIdioma').
+    oOpt:add('value', 'TrocaValorDesIdioma').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Esconder DesIdioma').
+    oOpt:add('value', 'EsconderDesIdioma').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Aparecer DesIdioma').
+    oOpt:add('value', 'AparecerDesIdioma').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Mostra Mensagem de Erro').
+    oOpt:add('value', 'showErrorMessage').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Muda Label DesIdioma').
+    oOpt:add('value', 'mudaLabelDesIdioma').
+    oOpts:add(oOpt).
+
+    ASSIGN oObj = NEW JsonObject().
+    oObj:add('property', 'codAcoes').
+    oObj:add('label', 'Acoes de Tela').
+    oObj:add('visible', TRUE).
+    oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
+    oObj:add('options', oOpts).
+    oObj:add('gridColumns', 12).
+    oIdiomas:add(oObj).
+
+    // Informacoes de Tipo de Pessoa
+    ASSIGN oOpts = NEW JsonArray().
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Pessoa Fisica').
+    oOpt:add('value', 'f').
+    oOpts:add(oOpt).
+    ASSIGN oOpt = NEW JsonObject().
+    oOpt:add('label', 'Pessoa Juridica').
+    oOpt:add('value', 'j').
+    oOpts:add(oOpt).
+    
+    ASSIGN oObj = NEW JsonObject().
+    oObj:add('property', 'tipUsuario').
+    oObj:add('label', 'Tipo do usuario').
+    oObj:add('visible', TRUE).
+    oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
+    oObj:add('options', oOpts).
+    oObj:add('gridColumns', 6).
+    oIdiomas:add(oObj).
+
+    ASSIGN oObj = NEW JsonObject().
+    oObj:add('property', 'codCpfCnpj').
+    oObj:add('label', 'CPF/CNPJ').
+    oObj:add('visible', TRUE).
+    oObj:add('mask', '999.999.999-99').
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
     oObj:add('gridColumns', 6).
     oIdiomas:add(oObj).
@@ -380,6 +468,234 @@ PROCEDURE piDeleteRecord:
     END.
     
     RETURN (IF lDeleted THEN "OK" ELSE "NOK").
+END PROCEDURE.
+
+PROCEDURE pValidateForm:
+    DEFINE INPUT  PARAMETER oJsonInput  AS JsonObject NO-UNDO.
+    DEFINE OUTPUT PARAMETER oJsonOutput AS JsonObject NO-UNDO.
+
+    DEFINE VARIABLE oRequest   AS JsonAPIRequestParser NO-UNDO.
+    DEFINE VARIABLE oResponse  AS JsonAPIResponse      NO-UNDO.
+    DEFINE VARIABLE oBody      AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE cProp      AS CHARACTER            NO-UNDO.
+    DEFINE VARIABLE oValue     AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE cValue     AS CHARACTER            NO-UNDO.
+    DEFINE VARIABLE cId        AS CHARACTER            NO-UNDO.
+    DEFINE VARIABLE oNewValue  AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE oNewFields AS JsonArray            NO-UNDO.
+    DEFINE VARIABLE cFocus     AS CHARACTER            NO-UNDO.
+
+    DEFINE VARIABLE oRet       AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE oObj       AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE oMessages  AS JsonArray            NO-UNDO.
+
+    oRequest = NEW JsonAPIRequestParser(oJsonInput).
+    oBody    = oRequest:getPayload().
+   
+    // obtem o nome da propriedade que ocorreu o LEAVE para validacao
+    cProp      = oBody:getCharacter("property")     NO-ERROR.
+    oValue     = oBody:getJsonObject("value")       NO-ERROR.
+    cValue     = STRING(oValue:GetCharacter(cProp)) NO-ERROR.
+    cId        = oValue:getCharacter("id")          NO-ERROR.
+    
+    /* Recebemos do HTML o JSON abaixo
+    {
+        "property": "codAcoes",
+        "value": {
+            "codIdiomPadr": "01 Portuguˆs",
+            "codIdioma": "12345678",
+            "desIdioma": "12345678901234567890",
+            "hraUltAtualiz": "",
+            "datUltAtualiz": null,
+            "id": 6,
+            "codAcoes": "FocoDesIdioma"
+        }
+    }
+    */
+
+    // Novas Acoes sobre os campos da tela
+    
+    // oNewValue guarda os valores a serem especificados para os campos
+    ASSIGN oNewValue = NEW JsonObject().
+    
+    // oNewFields guarda a lista de campos que serao alterados/modificados
+    ASSIGN oNewFields = NEW JsonArray().
+    
+    // cFocus especifica em qual campo sera feito o focus
+    ASSIGN cFocus = cProp.
+
+    // oMessages guarda as mensagens de retorno formato 
+    // { code: '00', message: 'texto', detailedMessage: 'detalhes da mensagem' }
+    ASSIGN oMessages = NEW JsonArray().
+   
+    CASE cProp:
+        WHEN "codAcoes" THEN DO:
+            CASE cValue:
+                WHEN 'focoCodIdiomPadr' THEN DO:
+                    // setamos o focus para o campo desejado
+                    ASSIGN cFocus = 'codIdiomPadr'.
+                END.
+                WHEN 'FocoDesIdioma' THEN DO:
+                    // setamos o focus para o campo desejado
+                    ASSIGN cFocus = 'desIdioma'.
+                END.
+                WHEN 'DesabilitaCodIdiomaPadrao' THEN DO:
+                    // criamos um novo field para desabilitar
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'codIdiomPadr').
+                    oObj:add('disabled', TRUE).
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'HabilitaCodIdiomaPadrao' THEN DO:
+                    // criamos um novo field para habilitar
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'codIdiomPadr').
+                    oObj:add('disabled', FALSE).
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'MascaraCPF' THEN DO:
+                    // IMPORTANTE:
+                    // Quando alteramos o valor do radio-set tipUsuario por aqui,
+                    // O value-changed dele que especifica qual a mascara
+                    // ser  utilizada NAO sera disparado, pois ele ‚ dinamico e 
+                    // estamos validando o campo codAcoes, sendo necessario 
+                    // fazermos a formatacao da mascara aqui tambem. 
+                    // A mesma regra ‚ valida para o CNPJ
+                    
+                    // mudamos os valores dos campos desejados
+                    oNewValue:add('tipUsuario', 'f').
+                    oNewValue:add('codCpfCnpj', FILL('0',11)).
+
+                    // criamos um novo field para mudar a mascara
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'codCpfCnpj').
+                    oObj:add('mask', '999.999.999-99').
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'MascaraCNPJ' THEN DO:
+                    // IMPORTANTE:
+                    // Quando alteramos o valor do radio-set tipUsuario por aqui,
+                    // O value-changed dele que especifica qual a mascara
+                    // ser  utilizada NAO sera disparado, pois ele ‚ dinamico e 
+                    // estamos validando o campo codAcoes, sendo necessario 
+                    // fazermos a formatacao da mascara aqui tambem. 
+                    // A mesma regra ‚ valida para o CPF
+
+                    // alteramos os valores dos campos desejados
+                    oNewValue:add('tipUsuario', 'j').
+                    oNewValue:add('codCpfCnpj', FILL('0',15)).
+
+                    // criamos um novo field para mudar a mascara
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'codCpfCnpj').
+                    oObj:add('mask', '99.999.999/9999-99').
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'TrocaValorDesIdioma' THEN DO:
+                    // alteramos o conteudo de um campo qualquer
+                    oNewValue:add('desIdioma', "Valor retornado do backend de validacao").
+                END.
+                WHEN 'EsconderDesIdioma' THEN DO:
+                    // criamos um novo field para tornar invisivel o campo
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'desIdioma').
+                    oObj:add('visible', FALSE).
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'AparecerDesIdioma' THEN DO:
+                    // criamos um novo field para tornar visivel o campo
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'desIdioma').
+                    oObj:add('visible', TRUE).
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'mudaLabelDesIdioma' THEN DO:
+                    // criamos um novo field para mudar o label
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('property', 'desIdioma').
+                    oObj:add('label', 'Label alterado da descricao').
+                    oNewFields:add(oObj).
+                END.
+                WHEN 'showErrorMessage' THEN DO:
+                    // criamos uma mensagem de erro
+                    ASSIGN oObj = NEW JsonObject().
+                    oObj:add('code', '33').
+                    oObj:add('message', 'A Descricao do idioma nao foi preenchida corretamente'). 
+                    oObj:add('detailedMessage', 'Detalhe da mensagem de erro').
+                    oMessages:add(oObj).
+                END.
+            END CASE.
+        END.
+        WHEN "tipUsuario" THEN DO:
+            // setamos o focus para o campo desejado
+            ASSIGN cFocus = 'codCpfCnpj'.
+
+            // criamos um field para mudar o informar o campo e a nova mascara
+            ASSIGN oObj = NEW JsonObject().
+            oObj:add('property', "codCpfCnpj").
+            IF  cValue = "j" THEN DO:
+                // ‚ definido um novo valor para o CNPJ
+                oNewValue:add('codCpfCnpj', FILL('0',15)).
+                // ‚ alterado o formato da mascara de edicao
+                oObj:add('mask', '99.999.999/9999-99').
+            END.
+            IF  cValue = "f" THEN DO:
+                // ‚ definido um novo valor para o CPF
+                oNewValue:add('codCpfCnpj', FILL('0',11)).
+                // ‚ alterado o formato da mascara de edicao
+                oObj:add('mask', '999.999.999-99').
+            END.
+            oNewFields:add(oObj).
+        END.
+    END CASE.
+    
+    ASSIGN oRet = NEW JsonObject().
+    // value -> contem todos os valores dos campos de tela
+    oRet:add('value', oNewValue).
+    // fields -> contem a lista de campos com suas novas propriedades
+    oRet:add('fields', oNewFields).
+    // focus -> especifica em qual campo o cursor vai ficar posicionado
+    oRet:add('focus', cFocus).
+    // _messages -> contem uma lista de mensagens que vao aparecer como notificacoes
+    oRet:add('_messages', oMessages).
+    
+    // encapsulamos o retorno para enviar para a UPC
+    oObj = NEW JsonObject().
+    oObj:add("property", cProp).
+    oObj:add("originalValues", oValue).
+    oObj:add("root", oRet).
+
+    // Realiza a chamada da UPC Progress
+    {include/i-epcrest.i &endpoint=validateForm &event=validateForm &jsonVar=oObj}    
+
+    // obtem o retorno customizado, onde o mesmo foi alterado e retornado somente 
+    // o conteudo da tag return
+    oRet = oObj:getJsonObject("root").
+
+    /* JSON de retorno para o HTML      
+    value: {
+      desIdioma: 'teste de escrita',
+      hraUltAtualiz: '17:18:19'
+    },
+    fields: [
+      {
+        property: 'codCpfCnpj', 
+        mask: '99.999.999/9999-99' 
+      }
+    ],
+    focus: 'hraUltAtualiz',
+    _messages: [ 
+        { 
+            code: '01', 
+            message: 'Mensagem do erro que aconteceu', 
+            detailedMessage: 'detalhes do erro acontecido' 
+        } 
+    ]
+    */
+    
+    // Retorna a colecao de campos customizados ou nao para a interface HTML
+    oResponse   = NEW JsonAPIResponse(oRet).
+    oJsonOutput = oResponse:createJsonResponse().
 END PROCEDURE.
 
 /* fim */

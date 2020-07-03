@@ -42,6 +42,7 @@ export class IdiomaEditComponent implements OnInit {
 
     // Carrega o registro pelo ID
     this.activatedRoute.params.subscribe(pars => {
+      // tslint:disable-next-line:no-string-literal
       this.currentId = pars['id'];
 
       // Se nao tiver o ID definido sera um CREATE
@@ -85,6 +86,7 @@ export class IdiomaEditComponent implements OnInit {
     fieldList = this.service.getFieldList(this.isUpdate);
     if (fieldList === null || fieldList.length === 0) {
       this.service.getMetadata().subscribe(resp => {
+        // tslint:disable-next-line:no-string-literal
         this.service.setFieldList(resp['items']);
         this.fields = this.service.getFieldList(this.isUpdate);
         this.showLoading = false;

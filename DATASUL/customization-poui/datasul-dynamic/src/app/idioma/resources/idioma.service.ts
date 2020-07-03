@@ -29,7 +29,6 @@ export class IdiomaService {
   }
 
   public getMetadata() {
-    // return this.http.get<any[]>(this.url + 'metadata', httpOptions).pipe();
     return this.http.post<any[]>(this.url + 'metadata', httpOptions).pipe();
   }
 

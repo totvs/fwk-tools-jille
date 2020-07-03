@@ -208,6 +208,114 @@ AND pEvent    = "beforeDelete" THEN DO ON STOP UNDO, LEAVE:
     */
 END.
 
+IF  pEndPoint = "validateForm"
+AND pEvent    = "validateForm" THEN DO ON STOP UNDO, LEAVE:
+    DEFINE VARIABLE cProp           AS CHARACTER  NO-UNDO.
+    DEFINE VARIABLE oOriginalValues AS JSonObject NO-UNDO.
+    DEFINE VARIABLE oReturn         AS JSonObject NO-UNDO.
+    DEFINE VARIABLE oValues         AS JSonObject NO-UNDO.
+    DEFINE VARIABLE oFields         AS JSonArray  NO-UNDO.
+    DEFINE VARIABLE cFocus          AS CHARACTER  NO-UNDO.
+    DEFINE VARIABLE oMessages       AS JSonArray  NO-UNDO.
+
+    cProp = jsonIO:getCharacter("property") NO-ERROR. // o cProp contem o nome da propriedade que esta sendo validada
+    oOriginalValues = jsonIO:getJsonObject("originalValues") NO-ERROR. // obtem os valores dos campos que vieram da tela html
+
+    oReturn = jsonIO:getJsonObject("root") NO-ERROR. // obtem o retorno que sera enviado para a tela html
+    oValues = oReturn:getJsonObject("value") NO-ERROR. // obtem os valores dos campos ja ajustados
+    oFields = oReturn:getJsonArray("fields") NO-ERROR. // obtem as propriedades dos campos a serem alteradas
+    cFocus = oReturn:getCharacter("focus") NO-ERROR. // obtem o campo de focus a ser retornado para a tela html
+    oMessages = oReturn:getJsonArray("_messages") NO-ERROR. // obtem as mensagens a serem retornados para a tela html
+    
+    /* JSON que veio para a UPC
+    { 
+        property: 'codAcao',
+        originalValues: {
+            "codIdiomPadr": "01 Portuguˆs",
+            "codIdioma": "12345678",
+            "desIdioma": "12345678901234567890",
+            "hraUltAtualiz": "",
+            "datUltAtualiz": null,
+            "id": 6,
+            "codAcoes": "FocoDesIdioma"
+        },
+        return: {
+            value: {
+              desIdioma: 'teste de escrita',
+              hraUltAtualiz: '17:18:19'
+            },
+            fields: [
+              {
+                property: 'codCpfCnpj', 
+                mask: '99.999.999/9999-99' 
+              }
+            ],
+            focus: 'hraUltAtualiz',
+            _messages: [ 
+                { 
+                    code: '01', 
+                    message: 'Mensagem do erro que aconteceu', 
+                    detailedMessage: 'detalhes do erro acontecido' 
+                } 
+            ]
+        }
+    }
+    */
+
+    IF cProp = "desIdioma" THEN DO:
+        cCodIdioma  = oOriginalValues:getCharacter("codIdioma"). // chave estrangeira
+        IF  cCodIdioma = "12345678" THEN DO:
+            oValues:add("desIdioma", "Valor customizado na UPC").
+            
+            // criamos um novo field para desabilitar
+            ASSIGN jObj = NEW JsonObject().
+            jObj:add('property', 'codIdiomPadr').
+            jObj:add('disabled', TRUE).
+            oFields:add(jObj).
+            
+            ASSIGN cFocus = "desIdioma".
+            
+            ASSIGN jObj = NEW JsonObject().
+            jObj:add('code', '44').
+            jObj:add('message', 'A UPC alterou algumas caracteristica da tela.'). 
+            jObj:add('detailedMessage', 'Na execu‡Æo da UPC, houveram altera‡äes nos campos de tela.').
+            oMessages:add(jObj).
+        END.
+    END.
+    
+    /* JSON de retorno para o HTML      
+    value: {
+      desIdioma: 'teste de escrita',
+      hraUltAtualiz: '17:18:19'
+    },
+    fields: [
+      {
+        property: 'codCpfCnpj', 
+        mask: '99.999.999/9999-99' 
+      }
+    ],
+    focus: 'hraUltAtualiz',
+    _messages: [ 
+        { 
+            code: '01', 
+            message: 'Mensagem do erro que aconteceu', 
+            detailedMessage: 'detalhes do erro acontecido' 
+        } 
+    ]
+    */
+
+    // atribui os valores de volta para a tela HTML
+    jsonIO = NEW JSonObject().
+    
+    oReturn = NEW JSonObject().
+    oReturn:add("value", oValues). // seta os valores dos campos ja ajustados
+    oReturn:add("fields", oFields). // seta as propriedades dos campos a serem alteradas
+    oReturn:add("focus", cFocus). // seta o campo de focus a ser retornado para a tela html
+    oReturn:add("_messages", oMessages). // seta as mensagens a serem retornadas para a tela html
+
+    jsonIO:add("root", oReturn).
+END.
+
 RETURN "OK".
 
 /* fim */
