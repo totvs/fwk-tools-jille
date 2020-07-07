@@ -7,6 +7,7 @@
 
 {utp/ut-api-action.i pGetMetadata POST /metadata/~* }
 {utp/ut-api-action.i pValidateForm POST /validateForm/~* }
+{utp/ut-api-action.i pValidateField POST /validateField/~* }
 {utp/ut-api-action.i pCreate POST /~* }
 
 {utp/ut-api-action.i pDeleteById DELETE /~* }
@@ -134,6 +135,7 @@ PROCEDURE pGetMetadata:
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
     oObj:add('options', oOpts).
     oObj:add('gridColumns', 12).
+    oObj:add('validate', '/api/trn/v1/idiomas/validateField').
     oIdiomas:add(oObj).
 
     // Informacoes de Tipo de Pessoa
@@ -154,6 +156,7 @@ PROCEDURE pGetMetadata:
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
     oObj:add('options', oOpts).
     oObj:add('gridColumns', 6).
+    oObj:add('validate', '/api/trn/v1/idiomas/validateField').    
     oIdiomas:add(oObj).
 
     ASSIGN oObj = NEW JsonObject().
@@ -668,8 +671,7 @@ PROCEDURE pValidateForm:
     // Realiza a chamada da UPC Progress
     {include/i-epcrest.i &endpoint=validateForm &event=validateForm &jsonVar=oObj}    
 
-    // obtem o retorno customizado, onde o mesmo foi alterado e retornado somente 
-    // o conteudo da tag return
+    // obtem o retorno customizado, onde o mesmo foi alterado e retornado na tag root 
     oRet = oObj:getJsonObject("root").
 
     /* JSON de retorno para o HTML      
@@ -690,6 +692,111 @@ PROCEDURE pValidateForm:
             message: 'Mensagem do erro que aconteceu', 
             detailedMessage: 'detalhes do erro acontecido' 
         } 
+    ]
+    */
+    
+    // Retorna a colecao de campos customizados ou nao para a interface HTML
+    oResponse   = NEW JsonAPIResponse(oRet).
+    oJsonOutput = oResponse:createJsonResponse().
+END PROCEDURE.
+
+PROCEDURE pValidateField:
+    DEFINE INPUT  PARAMETER oJsonInput  AS JsonObject NO-UNDO.
+    DEFINE OUTPUT PARAMETER oJsonOutput AS JsonObject NO-UNDO.
+
+    DEFINE VARIABLE oRequest   AS JsonAPIRequestParser NO-UNDO.
+    DEFINE VARIABLE oResponse  AS JsonAPIResponse      NO-UNDO.
+    DEFINE VARIABLE oBody      AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE cProp      AS CHARACTER            NO-UNDO.
+    DEFINE VARIABLE oValue     AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE cValue     AS CHARACTER            NO-UNDO.
+    DEFINE VARIABLE cId        AS CHARACTER            NO-UNDO.
+    DEFINE VARIABLE oNewValue  AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE oNewField  AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE lFocus     AS LOGICAL              NO-UNDO INITIAL FALSE.
+
+    DEFINE VARIABLE oRet       AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE oObj       AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE oMessages  AS JsonArray            NO-UNDO.
+
+    oRequest = NEW JsonAPIRequestParser(oJsonInput).
+    oBody    = oRequest:getPayload().
+   
+    // obtem o nome da propriedade que ocorreu o LEAVE para validacao
+    cProp      = oBody:getCharacter("property")     NO-ERROR.
+    cValue     = oBody:getCharacter("value")        NO-ERROR.
+    
+    /* Recebemos do HTML o JSON abaixo
+    {
+        "property": "codAcoes",
+        "value": "FocoDesIdioma"
+    }
+    */
+
+    // Novas Acoes sobre os campos da tela
+    
+    // oNewField guarda o objeto que sera alterado/modificado
+    ASSIGN oNewField = NEW JsonObject().
+    
+    // oMessages guarda as mensagens de retorno formato 
+    // { code: '00', message: 'texto', detailedMessage: 'detalhes da mensagem' }
+    ASSIGN oMessages = NEW JsonArray().
+
+    IF  cProp = "tipUsuario" THEN DO:
+        ASSIGN lFocus = TRUE.
+        
+        oNewField:add('property', "codCpfCnpj").
+        IF  cValue = "j" THEN DO:
+            // ‚ alterado o formato da mascara de edicao
+            oNewField:add('mask', '99.999.999/9999-99').
+        END.
+        IF  cValue = "f" THEN DO:
+            // ‚ alterado o formato da mascara de edicao
+            oNewField:add('mask', '999.999.999-99').
+        END.
+
+        ASSIGN oObj = NEW JsonObject().
+        oObj:add('code', '33').
+        oObj:add('message', 'A mascara do CPF/CNPJ foi ajustada'). 
+        oObj:add('detailedMessage', 'Ocorreu um ajusta na mascara do CPF/CNPJ, favor verificar se os dados estao corretos').
+        oMessages:add(oObj).
+    END.
+    
+    ASSIGN oRet = NEW JsonObject().
+    // value -> contem todos os valores dos campos de tela
+    oRet:add('value', cValue).
+    // field -> contem os novos atributos do campo atual
+    oRet:add('field', oNewField).
+    // focus -> especifica se o campo recebe o focu
+    oRet:add('focus', lFocus).
+    // _messages -> contem uma lista de mensagens que vao aparecer como notificacoes
+    oRet:add('_messages', oMessages).
+    
+    // encapsulamos o retorno para enviar para a UPC
+    oObj = NEW JsonObject().
+    oObj:add("property", cProp).
+    oObj:add("root", oRet).
+
+    // Realiza a chamada da UPC Progress
+    {include/i-epcrest.i &endpoint=validateField &event=validateField &jsonVar=oObj}    
+
+    // obtem o retorno customizado, onde o mesmo foi alterado e retornado somente 
+    // o conteudo da tag return
+    oRet = oObj:getJsonObject("root").
+
+    /* JSON de retorno para o HTML      
+    value: 'teste de escrita',
+    field: {
+        mask: '99.999.999/9999-99',
+        required: true 
+    },
+    focus: true,
+    _messages: [
+        {
+            code: '01', 
+            message: 'Mensagem do erro que aconteceu', 
+            detailedMessage: 'detalhes do erro acontecido' 
+        }
     ]
     */
     
