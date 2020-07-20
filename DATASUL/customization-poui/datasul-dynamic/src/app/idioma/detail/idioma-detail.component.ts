@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PoBreadcrumb } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoI18nService, PoBreadcrumbItem } from '@po-ui/ng-components';
 
 import { IdiomaService } from './../resources/idioma.service';
 
@@ -12,24 +12,27 @@ import { IdiomaService } from './../resources/idioma.service';
 
 export class IdiomaDetailComponent implements OnInit {
   // definicao das variaveis utilizadas
-  public cTitle = 'Detalhe do Idioma';
   public currentId: string;
   public fields: Array<any> = [];
   public record = {};
   public showLoading = false;
 
-  public readonly breadcrumb: PoBreadcrumb = { items: [
-      { label: 'Home', link: '/' },
-      { label: 'Idiomas', link: '/idiomas' },
-      { label: 'Detail' } ]
-  };
+  public literals;
+
+  public breadcrumb: PoBreadcrumb = { items: [] };
+  public breadcrumbItem: PoBreadcrumbItem;
 
   // construtor com os servicos necessarios
   constructor(
     private service: IdiomaService,
     private activatedRoute: ActivatedRoute,
-    private route: Router
-  ) { }
+    private route: Router,
+    private poI18nService: PoI18nService
+  ) {
+    poI18nService.getLiterals().subscribe((literals) => {
+      this.literals = literals;
+    });
+  }
 
   // load do componente
   public ngOnInit(): void {
@@ -42,7 +45,7 @@ export class IdiomaDetailComponent implements OnInit {
         Object.keys(resp).forEach((key) => this.record[key] = resp[key]);
 
         // carrega a lista de campos somente apos receber o registro a ser apresentado
-        this.fields = this.service.getFieldList(false);
+        this.fields = this.service.getFieldList(false, this.literals);
         if (this.fields === null || this.fields.length === 0) {
           this.service.getMetadata().subscribe(data => {
             this.fields = data['items'];
@@ -52,8 +55,18 @@ export class IdiomaDetailComponent implements OnInit {
         }
         this.showLoading = false;
       });
-
     });
+
+    this.setBreadcrumb();
+  }
+
+  private setBreadcrumb(): void {
+    this.breadcrumbItem = { label: this.literals?.home, link: '/' };
+    this.breadcrumb.items = this.breadcrumb.items.concat(this.breadcrumbItem);
+    this.breadcrumbItem = { label: this.literals?.language, link: '/idiomas' };
+    this.breadcrumb.items = this.breadcrumb.items.concat(this.breadcrumbItem);
+    this.breadcrumbItem = { label: this.literals?.detail };
+    this.breadcrumb.items = this.breadcrumb.items.concat(this.breadcrumbItem);
   }
 
   // Redireciona quando clicar no botao Edit

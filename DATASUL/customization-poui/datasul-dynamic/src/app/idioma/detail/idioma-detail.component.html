@@ -3,11 +3,11 @@
 </po-loading-overlay>
 
 <po-page-detail
-  [p-title]="cTitle"
+  [p-title]="literals?.languageDetail"
   [p-breadcrumb]="breadcrumb"
   (p-edit)="editClick()"
   (p-back)="goBackClick()">
-  <po-dynamic-view 
+  <po-dynamic-view
     [p-fields]="fields"
     [p-value]="record">
   </po-dynamic-view>

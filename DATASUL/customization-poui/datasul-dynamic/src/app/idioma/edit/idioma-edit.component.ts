@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PoBreadcrumb, PoDialogService, PoNotificationService } from '@po-ui/ng-components';
+import { PoBreadcrumb, PoDialogService, PoNotificationService, PoI18nService, PoDynamicFormField, PoBreadcrumbItem } from '@po-ui/ng-components';
 
 import { IdiomaService } from './../resources/idioma.service';
 
@@ -20,9 +20,12 @@ export class IdiomaEditComponent implements OnInit {
   public isUpdate = false;
   public showLoading = false;
 
-  public breadcrumb: PoBreadcrumb;
+  public breadcrumb: PoBreadcrumb = { items: [] };
+  public breadcrumbItem: PoBreadcrumbItem;
 
-  // Obtem a referencia do componente HTML
+  public literals;
+
+   // Obtem a referencia do componente HTML
   @ViewChild('formEdit', { static: true })
   formEdit: NgForm;
 
@@ -32,8 +35,13 @@ export class IdiomaEditComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private route: Router,
     private poDialog: PoDialogService,
-    private poNotification: PoNotificationService
-  ) { }
+    private poNotification: PoNotificationService,
+    private poI18nService: PoI18nService
+  ) {
+    poI18nService.getLiterals().subscribe((literals) => {
+      this.literals = literals;
+    });
+  }
 
   // Load do componente
   public ngOnInit(): void {
@@ -48,20 +56,14 @@ export class IdiomaEditComponent implements OnInit {
       // Se nao tiver o ID definido sera um CREATE
       if (this.currentId === undefined) {
         this.isUpdate = false;
-        this.cTitle = 'Inclusão de Idioma';
+        this.cTitle = this.literals?.insertLanguage;
       } else {
         this.isUpdate = true;
-        this.cTitle = 'Alteração de Idioma';
+        this.cTitle = this.literals?.editLanguage;
       }
 
       // Atualiza o breadcrumb de acordo com o tipo de edicao
-      this.breadcrumb = {
-        items: [
-          { label: 'Home', action: this.beforeRedirect.bind(this) },
-          { label: 'Idiomas', action: this.beforeRedirect.bind(this) },
-          { label: this.cTitle }
-        ]
-      };
+      this.setBreadcrumb();
 
       // Se for uma alteracao, busca o registro a ser alterado
       if (this.isUpdate) {
@@ -78,17 +80,26 @@ export class IdiomaEditComponent implements OnInit {
     });
   }
 
+  private setBreadcrumb(): void {
+    this.breadcrumbItem = { label: this.literals?.home, action: this.beforeRedirect.bind(this) };
+    this.breadcrumb.items = this.breadcrumb.items.concat(this.breadcrumbItem);
+    this.breadcrumbItem = { label: this.literals?.language, action: this.beforeRedirect.bind(this) };
+    this.breadcrumb.items = this.breadcrumb.items.concat(this.breadcrumbItem);
+    this.breadcrumbItem = { label: this.cTitle };
+    this.breadcrumb.items = this.breadcrumb.items.concat(this.breadcrumbItem);
+  }
+
   // Retorna a lista de campos
   private getMetadata() {
     let fieldList: Array<any> = [];
 
     // Carrega a lista de campos, trabalhando com um cache da lista de campos
-    fieldList = this.service.getFieldList(this.isUpdate);
+    fieldList = this.service.getFieldList(this.isUpdate, this.literals);
     if (fieldList === null || fieldList.length === 0) {
       this.service.getMetadata().subscribe(resp => {
         // tslint:disable-next-line:no-string-literal
         this.service.setFieldList(resp['items']);
-        this.fields = this.service.getFieldList(this.isUpdate);
+        this.fields = this.service.getFieldList(this.isUpdate, this.literals);
         this.showLoading = false;
       });
     } else {
@@ -103,8 +114,8 @@ export class IdiomaEditComponent implements OnInit {
       this.route.navigate(['/']);
     } else {
       this.poDialog.confirm({
-        title: `Confirma o redirecionamento para ${itemBreadcrumbLabel}`,
-        message: `Existem dados que não foram salvos ainda. Você tem certeza que quer sair ?`,
+        title: this.literals?.redirectConfirm,
+        message: this.literals?.questionCancelConfirm,
         confirm: () => this.route.navigate(['/'])
       });
     }
@@ -116,14 +127,14 @@ export class IdiomaEditComponent implements OnInit {
     if (this.isUpdate) {
       // Altera um registro ja existente
       this.service.update(this.currentId, this.record).subscribe(resp => {
-        this.poNotification.success('Idioma alterado com sucesso');
+        this.poNotification.success(this.literals?.languageChangedSuccess);
         this.showLoading = false;
         this.route.navigate(['/idiomas']);
       });
     } else {
       // Cria um registro novo
       this.service.create(this.record).subscribe(resp => {
-        this.poNotification.success('Idioma criado com sucesso');
+        this.poNotification.success(this.literals?.languageCreatedSuccess);
         this.showLoading = false;
         this.route.navigate(['/idiomas']);
       });
@@ -133,8 +144,8 @@ export class IdiomaEditComponent implements OnInit {
   // Cancela a edicao e redireciona ao clicar no botao Cancelar
   public cancelClick(): void {
     this.poDialog.confirm({
-      title: 'Confirma cancelamento',
-      message: 'Existem dados que não foram salvos ainda. Você tem certeza que quer cancelar ?',
+      title: this.literals?.cancelConfirm,
+      message: this.literals?.questionCancelConfirm,
       confirm: () => this.route.navigate(['/'])
     });
   }

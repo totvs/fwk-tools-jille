@@ -60,13 +60,28 @@ export class IdiomaService {
     return this.url;
   }
 
-  public getFieldList(update) {
+  public getFieldList(update, literals) {
     // ajusta alista de campos para habilitar ou nao a chave primaria se for CREATE
     let fields: Array<any> = [];
     if (this.fieldList.length > 0) {
       this.fieldList.forEach((data) => {
         if (data['property'] === 'codIdioma') {
           data['disabled'] = update;
+        }
+        if (data['label'] !== undefined) {
+          const key = data['label'].replace('{{', '').replace('}}', '');
+          if (literals[key] !== undefined) {
+            data['label'] = literals[key];
+          }
+        }
+        if (data['options'] !== undefined) {
+          let options = data['options'];
+          options.forEach((option) => {
+            const key = option['label'].replace('{{', '').replace('}}', '');
+            if (literals[key] !== undefined) {
+              option['label'] = literals[key];
+            }
+          });
         }
         fields.push(data);
       });
