@@ -82,6 +82,11 @@ AND pEvent    = "validateField" THEN DO ON STOP UNDO, LEAVE:
     RUN piValidateField.
 END.
 
+IF  pEndPoint = "i18n"
+AND pEvent    = "i18n" THEN DO ON STOP UNDO, LEAVE:
+    RUN piI18N.
+END.
+
 RETURN "OK".
 
 PROCEDURE piGetMetaData: 
@@ -92,7 +97,7 @@ PROCEDURE piGetMetaData:
     ASSIGN jObj = NEW JsonObject().
     jObj:add('divider', "Itens da UPC").
     jObj:add('property', 'codUsuario').
-    jObj:add('label', 'Usu rio').
+    jObj:add('label', '~{~{user~}~}').
     jObj:add('visible', TRUE).
     jObj:add('required', TRUE).
     jObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -101,7 +106,7 @@ PROCEDURE piGetMetaData:
     
     ASSIGN jObj = NEW JsonObject().
     jObj:add('property', 'nomUsuario').
-    jObj:add('label', 'Nome').
+    jObj:add('label', '~{~{name~}~}').
     jObj:add('visible', TRUE).
     jObj:add('required', TRUE).
     jObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -110,7 +115,7 @@ PROCEDURE piGetMetaData:
 
     ASSIGN jObj = NEW JsonObject().
     jObj:add('property', 'codDialet').
-    jObj:add('label', 'Dialeto').
+    jObj:add('label', '~{~{dialect~}~}').
     jObj:add('visible', FALSE). // <- Remove o item da tela de todos seus correspondentes (Form, View, Table)
     jObj:add('required', TRUE).
     jObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -119,7 +124,7 @@ PROCEDURE piGetMetaData:
     
     ASSIGN jObj = NEW JsonObject().
     jObj:add('property', 'testeValidacaoRegEx').
-    jObj:add('label', 'Teste Valida‡Æo RegEx').
+    jObj:add('label', '~{~{regexTestValidation~}~}').
     jObj:add('gridColumns', 6).
     jObj:add('pattern', "[0-9]~{2~}"). // <- Validacao RegEx
     jObj:add('errorMessage', 'Obrigat¢rio m¡nimo 2 n£meros consecutivos.').
@@ -127,7 +132,7 @@ PROCEDURE piGetMetaData:
 
     ASSIGN jObj = NEW JsonObject().
     jObj:add('property', 'numberRangeValidate').
-    jObj:add('label', 'Aplica‡Æo de m scara CPF').
+    jObj:add('label', '~{~{cpfMaskApply~}~}').
     jObj:add('mask', '999.999.999-99').  // <-- Mascara CPF
     jObj:add('visible', TRUE).
     jObj:add('required', FALSE).
@@ -137,7 +142,7 @@ PROCEDURE piGetMetaData:
     
     ASSIGN jObj = NEW JsonObject().
     jObj:add('property', 'numberValidate').
-    jObj:add('label', 'Somente n£meros').
+    jObj:add('label', '~{~{onlyNumbers~}~}').
     jObj:add('visible', TRUE).
     jObj:add('required', FALSE).
     jObj:add('minValue', 1).
@@ -432,6 +437,34 @@ PROCEDURE piValidateField:
     oReturn:add("_messages", oMessages). // seta as mensagens a serem retornadas para a tela html
 
     jsonIO:add("root", oReturn).
+END PROCEDURE.
+
+PROCEDURE piI18N:
+    DEFINE VARIABLE oParser      AS JsonAPIRequestParser NO-UNDO.
+    DEFINE VARIABLE oQueryParams AS JsonObject           NO-UNDO.
+    DEFINE VARIABLE pIdioma      AS CHARACTER            NO-UNDO.
+    
+    ASSIGN 
+        oParser      = NEW JsonAPIRequestParser(jsonIO) 
+        oQueryParams = oParser:GetQueryParams()
+        pIdioma      = oQueryParams:GetJsonArray("language"):GetCharacter(1).
+    
+    IF (pIdioma = "pt-BR") THEN DO:
+        jsonIO = NEW JsonObject().
+        jsonIO:Add("user", "Usu rio").
+        jsonIO:Add("name", "Nome").
+        jsonIO:Add("regexTestValidation", "Teste Valida‡Æo REGEX").
+        jsonIO:Add("cpfMaskApply", "Aplica‡Æo M scara CPF").
+        jsonIO:Add("onlyNumbers", "Somente N£meros").
+    END.
+    ELSE IF (pIdioma = "en-US") THEN DO:
+        jsonIO = NEW JsonObject().
+        jsonIO:Add("user", "User").
+        jsonIO:Add("name", "Name").
+        jsonIO:Add("regexTestValidation", "REGEX Test Validation").
+        jsonIO:Add("cpfMaskApply", "CPF Apply Mask").
+        jsonIO:Add("onlyNumbers", "Only Numbers").
+    END.
 END PROCEDURE.
 
 /* fim */

@@ -1,6 +1,7 @@
 {utp/ut-api.i}
 
 {utp/ut-api-action.i pFindById GET /byid/~* }
+{utp/ut-api-action.i pIdiomas GET /translations/~* }
 {utp/ut-api-action.i pFindAll GET /~* }
 
 {utp/ut-api-action.i pUpdateById PUT /~* }
@@ -38,7 +39,7 @@ PROCEDURE pGetMetadata:
     /* Define a lista de campos a serem apresentados no HTML */
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'codIdioma').
-    oObj:add('label', 'Idioma').
+    oObj:add('label', "~{~{language~}~}").
     oObj:add('visible', TRUE).
     oObj:add('disable', TRUE).
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -47,7 +48,7 @@ PROCEDURE pGetMetadata:
     
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'desIdioma').
-    oObj:add('label', 'Descriá∆o').
+    oObj:add('label', '~{~{description~}~}').
     oObj:add('visible', TRUE).
     oObj:add('required', TRUE).
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -56,7 +57,7 @@ PROCEDURE pGetMetadata:
 
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'codIdiomPadr').
-    oObj:add('label', 'Idioma Padr∆o').
+    oObj:add('label', '~{~{defaultLanguage~}~}').
     oObj:add('visible', TRUE).
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
     oObj:add('gridColumns', 6).
@@ -64,7 +65,7 @@ PROCEDURE pGetMetadata:
 
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'datUltAtualiz').
-    oObj:add('label', 'Èltima Atualizaá∆o').
+    oObj:add('label', '~{~{lastUpdate~}~}').
     oObj:add('visible', TRUE).
     oObj:add('format', 'dd/MM/yyyy').
     oObj:add('disable', TRUE).
@@ -74,7 +75,7 @@ PROCEDURE pGetMetadata:
 
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'hraUltAtualiz').
-    oObj:add('label', 'Hora Èltima Atualizaá∆o').
+    oObj:add('label', '~{~{hourLastUpdate~}~}').
     oObj:add('visible', TRUE).
     oObj:add('disable', TRUE).
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -84,53 +85,53 @@ PROCEDURE pGetMetadata:
     // acoes de tela para testes de validacao do formulario
     ASSIGN oOpts = NEW JsonArray().
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Foco CodIdiomaPadrao').
+    oOpt:add('label', '~{~{languageDefaultFocus~}~}').
     oOpt:add('value', 'focoCodIdiomPadr').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Foco DesIdioma').
+    oOpt:add('label', '~{~{descriptionFocus~}~}').
     oOpt:add('value', 'FocoDesIdioma').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Desabilita CodIdiomaPadrao').
+    oOpt:add('label', '~{~{languageDefaultDisable~}~}').
     oOpt:add('value', 'DesabilitaCodIdiomaPadrao').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Habilita CodIdiomaPadrao').
+    oOpt:add('label', '~{~{languageDefaultEnable~}~}').
     oOpt:add('value', 'HabilitaCodIdiomaPadrao').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Mascara CPF').
+    oOpt:add('label', '~{~{cpfMask~}~}').
     oOpt:add('value', 'MascaraCPF').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Mascara CNPJ').
+    oOpt:add('label', '~{~{cnpjMask~}~}').
     oOpt:add('value', 'MascaraCNPJ').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'TrocaValor DesIdioma').
+    oOpt:add('label', '~{~{changeValueLanguage~}~}').
     oOpt:add('value', 'TrocaValorDesIdioma').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Esconder DesIdioma').
+    oOpt:add('label', '~{~{languageHide~}~}').
     oOpt:add('value', 'EsconderDesIdioma').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Aparecer DesIdioma').
+    oOpt:add('label', '~{~{languageShow~}~}').
     oOpt:add('value', 'AparecerDesIdioma').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Mostra Mensagem de Erro').
+    oOpt:add('label', '~{~{errorMessageShow~}~}').
     oOpt:add('value', 'showErrorMessage').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Muda Label DesIdioma').
+    oOpt:add('label', '~{~{languageLabelChange~}~}').
     oOpt:add('value', 'mudaLabelDesIdioma').
     oOpts:add(oOpt).
 
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'codAcoes').
-    oObj:add('label', 'Acoes de Tela').
+    oObj:add('label', '~{~{screenActions~}~}').
     oObj:add('visible', TRUE).
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
     oObj:add('options', oOpts).
@@ -141,17 +142,17 @@ PROCEDURE pGetMetadata:
     // Informacoes de Tipo de Pessoa
     ASSIGN oOpts = NEW JsonArray().
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Pessoa Fisica').
+    oOpt:add('label', '~{~{PF~}~}').
     oOpt:add('value', 'f').
     oOpts:add(oOpt).
     ASSIGN oOpt = NEW JsonObject().
-    oOpt:add('label', 'Pessoa Juridica').
+    oOpt:add('label', '~{~{PJ~}~}').
     oOpt:add('value', 'j').
     oOpts:add(oOpt).
     
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'tipUsuario').
-    oObj:add('label', 'Tipo do usuario').
+    oObj:add('label', '~{~{userType~}~}').
     oObj:add('visible', TRUE).
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
     oObj:add('options', oOpts).
@@ -161,7 +162,7 @@ PROCEDURE pGetMetadata:
 
     ASSIGN oObj = NEW JsonObject().
     oObj:add('property', 'codCpfCnpj').
-    oObj:add('label', 'CPF/CNPJ').
+    oObj:add('label', '~{~{documentOptions~}~}').
     oObj:add('visible', TRUE).
     oObj:add('mask', '999.999.999-99').
     oObj:add('type', JsonAPIUtils:convertAblTypeToHtmlType('character')).
@@ -804,5 +805,19 @@ PROCEDURE pValidateField:
     oResponse   = NEW JsonAPIResponse(oRet).
     oJsonOutput = oResponse:createJsonResponse().
 END PROCEDURE.
+
+/**
+    Recupera as literais
+*/
+PROCEDURE pIdiomas:
+    DEFINE INPUT  PARAMETER oJsonInput  AS JsonObject    NO-UNDO.
+    DEFINE OUTPUT PARAMETER oJsonOutput AS JsonObject    NO-UNDO.
+    
+    // Realiza a chamada da UPC Progress
+    {include/i-epcrest.i &endpoint=i18n &event=i18n &jsonVar=oJsonInput}
+    
+    ASSIGN oJsonOutput = oJsonInput.
+END PROCEDURE.
+
 
 /* fim */
