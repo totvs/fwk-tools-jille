@@ -16,28 +16,49 @@ const httpOptions: object = {
   providedIn: 'root'
 })
 export class PersonalizationService {
+  public progCode = 'html.aplicativos-eai';
+
   // Endpoint progress do framework para obtencao da lista de campos personalizados
   private urlMetadata = '/api/btb/v1/personalizationView/metadata/';
 
   // Endpoint progress da area de negocio para obtencao dos valores dos campos personalizados
   private urlArea = '/api/trn/v1/idiomaValues/';
 
-  private fieldList: Array<any> = [];
-
   constructor(
     private http: HttpClient,
     private poNotification: PoNotificationService,
   ) { }
 
-  public loadMetadata(cProg) {
-    return this.http.post<any[]>(this.urlMetadata + cProg, httpOptions).pipe();
+  public loadMetadata() {
+    return this.http.post<any[]>(this.urlMetadata + this.progCode, httpOptions).pipe();
   }
 
-  public loadValues(cProg, cId) {
-    return this.http.get<any[]>(this.urlArea + cProg + '/' + cId, httpOptions).pipe();
+  public loadValuesById(cId) {
+    // tslint:disable-next-line:whitespace
+    return this.http.get<any[]>(this.urlArea + 'byid/' + this.progCode + '/' + cId, httpOptions).pipe();
+  }
+
+  public loadAllValues() {
+    return this.http.get<any[]>(this.urlArea + this.progCode + '/', httpOptions).pipe();
+  }
+
+  public create(cId, record) {
+    return this.http.post<any[]>(this.urlArea + this.progCode + '/' + cId, record, httpOptions).pipe();
+  }
+
+  public update(cId, record) {
+    return this.http.put<any[]>(this.urlArea + this.progCode + '/' + cId, record, httpOptions).pipe();
+  }
+
+  public delete(cId, record) {
+    return this.http.put<any[]>(this.urlArea + this.progCode + '/' + cId, record, httpOptions).pipe();
   }
 
   public getUrlArea(): string {
-    return this.urlArea;
+    return this.urlArea + this.progCode;
+  }
+
+  public getUrlAreaValidation(): string {
+    return this.urlArea + 'validateForm/' + this.progCode;
   }
 }

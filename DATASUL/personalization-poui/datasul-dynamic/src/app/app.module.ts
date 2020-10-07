@@ -5,13 +5,17 @@ import { PoLoadingModule, PoModule } from '@po-ui/ng-components';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { PersonalizationDetailComponent } from './personalization/detail/personalization-detail.component';
+import { PersonalizationEditComponent } from './personalization/edit/personalization-edit.component';
+import { PersonalizationListComponent } from './personalization/list/personalization-list.component';
 import { SharedModule } from './shared/shared.module';
-import { PersonalizationComponent } from './personalization/personalization.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    PersonalizationComponent
+    PersonalizationDetailComponent,
+    PersonalizationEditComponent,
+    PersonalizationListComponent
   ],
   imports: [
     BrowserModule,

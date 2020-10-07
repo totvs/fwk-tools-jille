@@ -1,12 +1,17 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { PersonalizationComponent } from './personalization/personalization.component';
+import { PersonalizationEditComponent } from './personalization/edit/personalization-edit.component';
+import { PersonalizationListComponent } from './personalization/list/personalization-list.component';
+import { PersonalizationDetailComponent } from './personalization/detail/personalization-detail.component';
 
 const routes: Routes = [
-  { path: 'personalization', component: PersonalizationComponent },
+  { path: 'personalization/create', component: PersonalizationEditComponent },
+  { path: 'personalization/detail/:id', component: PersonalizationDetailComponent },
+  { path: 'personalization/edit/:id', component: PersonalizationEditComponent },
+  { path: 'personalization', component: PersonalizationListComponent },
   { path: '', redirectTo: '/personalization', pathMatch: 'full' },
-  { path: '**', component: PersonalizationComponent }
+  { path: '**', component: PersonalizationListComponent }
 ];
 
 @NgModule({
