@@ -67,7 +67,7 @@ PROCEDURE pGetDataById:
             // deve somente alimentar os campos que serao personalizados
             hTab = BUFFER idioma:HANDLE.
             FOR EACH ttPersonalization:    
-                ASSIGN cFld = ttPersonalization.cod_campo_perzdo.
+                ASSIGN cFld = ttPersonalization.codField.
                 oObj:add(cFld, hTab:BUFFER-FIELD(cFld):buffer-value()) NO-ERROR.
             END.
             hTab:BUFFER-RELEASE().
@@ -111,7 +111,7 @@ PROCEDURE pGetAll:
             // deve somente alimentar os campos que serao personalizados    
             hTab = BUFFER idioma:HANDLE.
             FOR EACH ttPersonalization:    
-                ASSIGN cFld = ttPersonalization.cod_campo_perzdo.
+                ASSIGN cFld = ttPersonalization.codField.
                 oObj:add(cFld, hTab:BUFFER-FIELD(cFld):buffer-value()) NO-ERROR.
             END.
             hTab:BUFFER-RELEASE().
@@ -363,8 +363,8 @@ PROCEDURE piSetPersonalizationData:
     DEFINE INPUT PARAMETER oBody AS JsonObject NO-UNDO. 
 
     FOR EACH ttPersonalization:
-        ASSIGN cFld  = ttPersonalization.cod_campo_perzdo
-               cType = JsonAPIUtils:convertAblTypeToHtmlType(ttPersonalization.des_tip_campo_perzdo).
+        ASSIGN cFld  = ttPersonalization.codField
+               cType = ttPersonalization.codType.
         CASE cType:
             WHEN "string"   THEN
                 hTab:BUFFER-FIELD(cFld):buffer-value() = oBody:getCharacter(cFld) NO-ERROR.

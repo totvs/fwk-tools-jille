@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { PersonalizationDetailComponent } from './personalization/detail/personalization-detail.component';
 import { PersonalizationEditComponent } from './personalization/edit/personalization-edit.component';
 import { PersonalizationListComponent } from './personalization/list/personalization-list.component';
+import { PersonalizationService } from './personalization/personalization.service';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
@@ -25,8 +26,7 @@ import { SharedModule } from './shared/shared.module';
     RouterModule.forRoot([]),
     PoModule
   ],
-  providers: [
-  ],
+  providers: [PersonalizationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

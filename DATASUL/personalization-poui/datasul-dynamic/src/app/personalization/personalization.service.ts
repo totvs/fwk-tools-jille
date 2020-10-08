@@ -50,12 +50,8 @@ export class PersonalizationService {
     return this.http.put<any[]>(this.urlArea + this.progCode + '/' + cId, record, httpOptions).pipe();
   }
 
-  public delete(cId, record) {
-    return this.http.put<any[]>(this.urlArea + this.progCode + '/' + cId, record, httpOptions).pipe();
-  }
-
   public getUrlArea(): string {
-    return this.urlArea + this.progCode;
+    return this.urlArea + this.progCode + '/';
   }
 
   public getUrlAreaValidation(): string {
