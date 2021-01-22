@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>totvs-poi-pasoe</artifactId>
+	<packaging>war</packaging>
+	<name>TOTVS | Framework POI Pasoe</name>
+	<description>TOTVS POI Pasoe</description>
+	
+	<dependencies>
+	
+		<!-- SPRING FRAMEWORK -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+	
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-ws-core</artifactId>
+			<version>3.0.7.RELEASE</version>
+		</dependency>
+
+		<!-- GOOGLE -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+	    
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+	
+		<!-- JERSEY -->
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+		    <version>2.6</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+		    <version>2.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+		    <version>2.6</version>
+		</dependency>
+	
+		<!-- DIVERSOS -->
+		<dependency>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>javax.servlet-api</artifactId>
+		  <version>${servlet.version}</version>
+		</dependency>
+
+		<dependency>
+		  <groupId>javax.xml.bind</groupId>
+		  <artifactId>jaxb-api</artifactId>
+		  <version>2.3.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.3</version>
+		</dependency>
+
+		<!-- TOTVS -->
+		<dependency>
+			<groupId>com.totvs.framework</groupId>
+			<artifactId>totvs-fwk-properties</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.totvs.framework</groupId>
+			<artifactId>totvs-fwk-properties-source</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.totvs.framework</groupId>
+			<artifactId>totvs-fwk-sso</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<finalName>totvs-poi-pasoe</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo>Copying WAR to TOMCAT</echo>
+								<copy file="${project.build.directory}/totvs-poi-pasoe.war"
+									tofile="${webapps.pasoe.target}/totvs-poi.war" verbose="true" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<parent>
+		<groupId>com.totvs.framework</groupId>
+		<artifactId>datasul</artifactId>
+		<version>11.5.X-NFRW-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+</project>
